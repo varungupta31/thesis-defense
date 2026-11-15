@@ -37,6 +37,7 @@
       else if (/^[-*] /.test(s)) out.push({ type: 'ul', items: take(/^[-*] /, x => x.slice(2)) });
       else if (/^\d+\. /.test(s)) out.push({ type: 'ol', items: take(/^\d+\. /, x => x.replace(/^\d+\.\s/, '')) });
       else if (s.startsWith('|')) out.push({ type: 'table', rows: take(/^\|/, x => x).filter(r => !/^\|[\s:|-]+\|$/.test(r)).map(r => r.replace(/^\||\|$/g, '').split('|').map(c => c.trim())) });
+      else if (/^!\[[^\]]*\]\([^)]+\)$/.test(s)) { const m = s.match(/^!\[([^\]]*)\]\(([^)]+)\)$/); out.push({ type: 'img', alt: m[1], src: m[2] }); i++; }
       else if (/^\[(A\d+|media)\]/i.test(s)) { const m = s.match(/^\[([^\]]+)\]\s*(.*)$/); out.push({ type: 'media', id: m[1], text: m[2] }); i++; }
       else if (s.includes(' :: ')) out.push({ type: 'stats', items: take(/ :: /, x => x.split(' :: ')) });
       else if (s.startsWith('~ ')) { out.push({ type: 'small', text: s.slice(2) }); i++; }
@@ -44,6 +45,9 @@
     }
     return { out, notes };
   }
+
+  const slides = parse(src);
+  const THEMES = slides.map(s => s.chapter.toLowerCase()).filter(Boolean);
 
   // ---------- render ----------
   const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -53,6 +57,11 @@
     .replace(/`(.+?)`/g, '<code>$1</code>');
   const initials = name => name.split(/[\s.]+/).filter(Boolean).map(w => w[0]).slice(0, 2).join('');
 
+  // a list item or column that starts with a chapter name takes that chapter's colour
+  const themeOf = text => { const w = (text.match(/^\**([A-Za-z]+)/) || [])[1]; return w && THEMES.includes(w.toLowerCase()) ? w.toLowerCase() : ''; };
+  const tint = text => { const t = themeOf(text); return t ? ` data-chapter="${t}"` : ''; };
+  const li = x => `<li${tint(x)}>${inline(x)}</li>`;
+
   function html(b, layout) {
     switch (b.type) {
       case 'h1': return `<h1>${inline(b.text)}</h1>`;
@@ -61,11 +70,20 @@
       case 'take': return `<p class="take">${inline(b.text)}</p>`;
       case 'p': return `<p>${inline(b.text)}</p>`;
       case 'small': return `<p class="small">${inline(b.text)}</p>`;
-      case 'ol': return `<ol>${b.items.map(x => `<li>${inline(x)}</li>`).join('')}</ol>`;
+      case 'ol': return `<ol>${b.items.map(li).join('')}</ol>`;
+      case 'img': return /\.(mp4|webm|mov)$/i.test(b.src)
+        ? `<figure class="img"><video src="${esc(b.src)}" autoplay muted loop playsinline></video></figure>`
+        : `<figure class="img"><img src="${esc(b.src)}" alt="${esc(b.alt)}"></figure>`;
       case 'ul':
-        if (layout === 'people') return `<div class="faces">${b.items.map(x => `<figure><div class="face">${esc(initials(x))}</div><figcaption>${inline(x)}</figcaption></figure>`).join('')}</div>`;
-        return `<ul>${b.items.map(x => `<li>${inline(x)}</li>`).join('')}</ul>`;
-      case 'stats': return `<div class="stats">${b.items.map(([v, l]) => `<div class="stat"><div class="v">${inline(v)}</div><div class="l">${inline(l || '')}</div></div>`).join('')}</div>`;
+        if (layout === 'people') return `<div class="faces">${b.items.map(x => {
+          const [name, photo] = x.split(' | ').map(v => v.trim());
+          const face = photo ? `<img src="${esc(photo)}" alt="">` : esc(initials(name));
+          return `<figure><div class="face">${face}</div><figcaption>${inline(name)}</figcaption></figure>`;
+        }).join('')}</div>`;
+        return `<ul>${b.items.map(li).join('')}</ul>`;
+      case 'stats':
+        if (layout === 'credits') return b.items.map(([r, n]) => `<div class="credit"><span class="role">${inline(r)}</span><span class="names">${inline(n || '')}</span></div>`).join('');
+        return `<div class="stats">${b.items.map(([v, l]) => `<div class="stat"><div class="v">${inline(v)}</div><div class="l">${inline(l || '')}</div></div>`).join('')}</div>`;
       case 'media': return `<figure class="media"><span class="tag">${esc(b.id)}</span><p>${inline(b.text)}</p></figure>`;
       case 'table': {
         const [head, ...rows] = b.rows;
@@ -76,7 +94,6 @@
     return '';
   }
 
-  const slides = parse(src);
   const main = slides.filter(s => !s.id.startsWith('B'));
 
   // chapters for the progress bar
@@ -86,16 +103,15 @@
     if (chapters.length) chapters[chapters.length - 1].n++;
     s.ch = chapters.length - 1;
   });
-  const progStart = chapters.length ? chapters[0].start : main.length;
-  const progLen = main.length - progStart;
 
   function footer(s, idx) {
+    if (s.layout === 'credits' || s.layout === 'end') return '';
     if (s.id.startsWith('B')) return `<footer><span></span><span class="count">${esc(s.id)}</span></footer>`;
     const count = `<span class="count">${idx + 1} / ${main.length}<b>${esc(s.id)}</b></span>`;
     if (s.ch < 0 || s.layout === 'title') return `<footer><span></span>${count}</footer>`;
     const segs = chapters.map((c, k) => {
       const done = Math.max(0, Math.min(c.n, idx - c.start + 1));
-      return `<div class="seg${k === s.ch ? ' on' : ''}" style="flex:${c.n}"><i style="width:${(done / c.n) * 100}%"></i><span>${esc(c.label)}</span></div>`;
+      return `<div class="seg${k === s.ch ? ' on' : ''}" data-chapter="${esc(c.label.toLowerCase())}" style="flex:${c.n}"><i style="width:${(done / c.n) * 100}%"></i><span>${esc(c.label)}</span></div>`;
     }).join('');
     return `<footer><div class="progress">${segs}</div>${count}</footer>`;
   }
@@ -114,13 +130,16 @@
     if (rest.some(b => b.type === 'col')) {
       const cols = [[]];
       rest.forEach(b => b.type === 'col' ? cols.push([]) : cols[cols.length - 1].push(b));
-      body = `<div class="cols">${cols.filter(c => c.length).map(c => `<div class="col">${c.map(b => html(b, s.layout)).join('')}</div>`).join('')}</div>`;
+      body = `<div class="cols">${cols.filter(c => c.length).map(c => `<div class="col"${c[0].type === 'h3' ? tint(c[0].text) : ''}>${c.map(b => html(b, s.layout)).join('')}</div>`).join('')}</div>`;
     } else {
       body = rest.map(b => html(b, s.layout)).join('');
     }
     const frame = document.createElement('div');
     frame.className = 'frame';
-    frame.innerHTML = `<section class="slide ${esc(s.layout)}" data-id="${esc(s.id)}"><header>${head}</header><div class="body">${body}</div>${footer(s, main.indexOf(s))}</section>`;
+    // colour theme: the chapter a main slide belongs to, or the label on a backup slide
+    const theme = (s.id.startsWith('B') ? s.chapter : (chapters[s.ch] || {}).label || '').toLowerCase();
+    const inner = s.layout === 'credits' ? `<div class="body"><div class="roll">${head}${body}</div></div>` : `<header>${head}</header><div class="body">${body}</div>`;
+    frame.innerHTML = `<section class="slide ${esc(s.layout)}" data-id="${esc(s.id)}" data-chapter="${esc(theme)}">${inner}${footer(s, main.indexOf(s))}</section>`;
     frame.addEventListener('click', () => { if (document.body.classList.contains('overview')) { go(idx); toggle('overview'); } });
     deck.appendChild(frame);
     return frame;
@@ -128,6 +147,7 @@
 
   // flag slides whose content does not fit
   requestAnimationFrame(() => frames.forEach(f => {
+    if (f.querySelector('.roll')) return;
     const b = f.querySelector('.body');
     f.style.display = 'block';
     const isOver = () => b.scrollHeight > b.clientHeight + 2 || b.scrollWidth > b.clientWidth + 2;
@@ -148,10 +168,19 @@
   document.body.appendChild(notes);
 
   // ---------- navigation ----------
-  let cur = 0;
+  let cur = 0, roll = null;
+  const ROLL_SPEED = 70; // px per second
   function go(i) {
     cur = Math.max(0, Math.min(frames.length - 1, i));
     frames.forEach((f, k) => f.classList.toggle('current', k === cur));
+    if (roll) { roll.cancel(); roll = null; }
+    const r = frames[cur].querySelector('.roll');
+    if (r) {
+      const h = r.offsetHeight, at = cur;
+      roll = r.animate([{ transform: `translateY(${H}px)` }, { transform: `translateY(${-h}px)` }],
+        { duration: (h + H) / ROLL_SPEED * 1000, easing: 'linear', fill: 'forwards' });
+      roll.onfinish = () => { if (cur === at) go(cur + 1); };
+    }
     const s = slides[cur];
     notes.innerHTML = `<b>${esc(s.id)}</b> ${s.notes.length ? s.notes.map(inline).join('<br>') : '<span class="none">No notes.</span>'}`;
     history.replaceState(null, '', '#' + s.id);

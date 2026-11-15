@@ -10,8 +10,8 @@
 
 | ID | Slide | What | Status | Maker | File | Notes |
 |---|---|---|---|---|---|---|
-| A01 | Title | IIIT logo | have | — | `have/iiit-logo.jpg` | 1846×923 JPG. SVG/transparent PNG would be cleaner |
-| A02 | Meet Et al. | Collaborator photos (8, circular) | need | V | — | Square headshots, any size ≥400px |
+| A01 | Title, end card (S01, S48) | IIIT logo | have | — | `have/iiit-logo.jpg` | 1846×923 JPG, wired up. SVG/transparent PNG would be cleaner |
+| A02 | Meet et al. (S02) | Collaborator photos (8, circular) | fix | V | `have/people/*` | 7 of 8 in and wired up. Missing: Subhashini Venugopalan |
 | A03 | Intro | CNN specialist → billion-scale generalist timeline | need | C | — | Build as animated HTML timeline |
 | A04 | Intro (3 works) | Key GIF per chapter | fix | C | reuse A10, A20, A31 | Loop side by side |
 
@@ -23,7 +23,7 @@
 | A11 | Problem | Key road-safety stats | need | V | — | Numbers + source; C renders as count-up |
 | A12 | Prior works | Dataset comparison table | need | V+C | — | From paper; rebuild as HTML table |
 | A13 | MTSVD | Collection details + stats | need | V | — | Numbers; C designs |
-| A14 | CueCAN | Architecture diagram | need | V+C | — | **Animate candidate.** Need source (draw.io/PPT/PDF) |
+| A14 | CueCAN | Architecture diagram | need | C | thesis Fig. 2.4 | **Animate candidate.** No PPT source exists: redraw as SVG from the thesis figure |
 | A15 | Results | GradCAM examples | need | V | — | |
 | A16 | Results | Tables | need | V+C | — | HTML tables, highlight our row |
 | A17 | Problem (S09) | Same kind of curve with and without its sign | need | V | — | Two dashcam frames from MTSVD |

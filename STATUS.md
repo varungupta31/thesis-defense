@@ -1,6 +1,6 @@
 # Status
 
-**Phase:** Content v0 drafted in `deck/index.html`; next: Varun locks content, then media one at a time
+**Phase:** Content v0.1: answers folded in, chapter colours, closing sequence (publications, artifacts, credits roll, logo card). Next: resources, then media one at a time
 **Updated:** 2026-11-15
 
 ## Phases
@@ -22,8 +22,9 @@
 
 ## Open questions
 
-- Content `// 💬` comments in `deck/index.html`: S02 name spelling, S13 Asia vs India, S28 stray GradCAM, S31 "video index flex", S39 thesis text vs Table 4.2 mismatch, S41 "its" [sic], S42 agent-added summary.
-- 43 main slides for 45 min is tight; consider cutting or moving to backup.
+- `// 💬` comments in `deck/index.html`: S02 Subhashini photo, S42 summary (agent-written), S44 where Video-Index names VELOCITI, S45 equal-contribution mark, S46 artifact links, S47 juniors mapping (5 names, 4 descriptions).
+- OTaT "bird green": no asset with the bird here; using #23874b as a placeholder. Need the logo or hex.
+- 48 main slides for 45 min is over budget; flow notes from 2026-11-16 session suggest ~32.
 
 ## Ideas (parked)
 
@@ -44,3 +45,6 @@
 | 2026-11-15 | Content source moves from `outline.md` to `deck/index.html` | One place to edit; outline kept as the original plan |
 | 2026-11-15 | Media shown as `[Axx]` captions describing the intended visual | Lock content first, then build media one at a time |
 | 2026-11-15 | v0 style is neutral placeholder | Real direction comes from the style sampler after content lock |
+| 2026-11-16 | Chapter accents: CueCAn orange #d9650f, VELOCITI velo blue #2b6bef (from `velo_man.ico`), OTaT green #23874b (placeholder) | Varun's call; white page, only accents change. Intro and summary stay neutral slate |
+| 2026-11-16 | Close: Summary, Publications, Artifacts, Thank you / Questions, credits roll (dark), IIIT logo card | Movie ending Varun asked for; credits roll moves to the logo card by itself |
+| 2026-11-16 | Credits roles taken from the thesis acknowledgments, in his words | Inferred roles, no invented detail |

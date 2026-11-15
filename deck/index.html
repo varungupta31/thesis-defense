@@ -14,7 +14,9 @@
 
   --- S12 layout Label   starts a slide. Id first (never renumber), then optional layout,
                          then an optional word that starts a new chapter in the progress bar.
-                         Layouts: content (default), title, section, statement, media, people
+                         Layouts: content (default), title, section, statement, media, people,
+                         credits (scrolling roll, then moves on by itself), end (logo card)
+                         Chapter names Context / Reasoning / Generation set the accent colour.
   # Title                slide title
   ## Kicker              small label above the title (subtitle on title slides)
   ### Heading            small heading inside a column
@@ -23,6 +25,8 @@
   93.0% :: Humans        big number with a label (consecutive lines sit in a row)
   | a | b |              table. A row with a **bold** cell is highlighted
   [A10] description      media placeholder. Id from assets.md, or [media] if none yet
+  ![alt](path)           real image or video (.mp4/.webm loop silently), path relative to deck/
+  - Name | path          on a "people" slide: the photo for that person
   ~ Fine print           small grey line (sources, footnotes)
   +++                    start a new column
   note: text             speaker notes (press N)
@@ -40,20 +44,19 @@ Varun Gupta
 MS by Research · Public Defense
 Advisor: Prof. Makarand Tapaswi
 IIIT Hyderabad · 21 November 2026
-[A01] IIIT Hyderabad logo, small, in a corner.
+![IIIT Hyderabad](../assets/have/iiit-logo.jpg)
 
 --- S02 people
 # Meet et al.
-- Makarand Tapaswi
-- Vineet Gandhi
-- C.V. Jawahar
+- Makarand Tapaswi | ../assets/have/people/makarand_tapaswi.webp
+- Vineet Gandhi | ../assets/have/people/vineet_gandhi.jpg
+- C.V. Jawahar | ../assets/have/people/cv_jawahar.jpeg
 - Subhashini Venugopalan
-- Anbumani Subramanian
-- Rohit Saluja
-- Darshan Singh
-- Darshana Saravanan
-[A02] Circular headshots replace the initials.
-// 💬 The thesis spells "Subramaniam" in the publication list and "Subramanian" elsewhere. Which is right?
+- Anbumani Subramaniam | ../assets/have/people/anbumani_subramanian.jpg
+- Rohit Saluja | ../assets/have/people/rohit_saluja.jpeg
+- Darshan Singh | ../assets/have/people/darshan_singh.jpg
+- Darshana Saravanan | ../assets/have/people/darshana_saravanan.jpg
+// 💬 Subhashini's photo is missing from assets/have/people.
 
 --- S03
 # Outline
@@ -146,11 +149,10 @@ note: Sun et al. find missing curbs with a Siamese network on image and masked-i
 60+ :: sign categories
 2K :: clips with missing signs
 20+ :: cue types
-- Unconstrained Asian roads: night, rain, varied terrain
+- Unconstrained Indian roads: night, rain, varied terrain
 - The first public dataset for missing objects
 [A19] Annotated frames: boxes on signs, red tags for attributes such as "tilted" or "occluded".
 note: DDPAI X2S Pro dashcam, 2560 × 1440 at 25 fps. Each track is tagged for occlusion, tilt, damage, truncation, and non-standard signs. Cue intervals are labelled frame by frame, since some signs appear before their cue (for example, U-turn).
-// 💬 The thesis says "Asia". Should this say India?
 
 --- S14
 ## Method
@@ -300,7 +302,6 @@ Video: a red traffic light
 | Gemini-1.5-Pro † | 74.3 | 49.3 |
 | **Human †** | n/a | **93.0** |
 ~ StrictVLE accuracy. Control: the false caption comes from another video. † 150 samples per test.
-// 💬 The outline lists GradCAM under these results; it seems carried over from Chapter 2. Delete?
 
 --- S29
 ## Results
@@ -324,6 +325,19 @@ Video: a red traffic light
 > Without the video, or with one frame, scores fall sharply. Chain-of-thought makes them worse.
 note: At 8 fps, OV-72B drops 9 to 11 points on the action adversarial and action manner tests, perhaps because of the long context.
 
+--- S44 statement
+## Validation
+# An independent audit
+> Video-Index attacked more than 100 video benchmarks for shortcuts. VELOCITI survived every attack.
+1. Answer options only
+2. Question and options, no video
+3. Other items in the benchmark
+4. One frame or captions
+5. Shuffled or clipped video
+~ Song et al., Video-Index: A Curated Meta-Benchmark for Video Understanding, 2026
+note: A benchmark "breaks" at the first level where an attacker comes within 5 points of Gemini 3.5 Flash watching 32 frames. 38 benchmarks survive every level.
+// 💬 I could not find VELOCITI named in the blog post or the arXiv HTML. Which table or report card shows it? Worth citing on the slide.
+
 --- S31
 ## Validation
 # Humans and failures
@@ -331,7 +345,6 @@ note: At 8 fps, OV-72B drops 9 to 11 points on the action adversarial and action
 2,100 :: video-caption pairs, 3 annotators
 [A29] Three OV-72B samples, each with 10 frames, both captions, and both scores: one passes StrictVLE, one passes only ClassicVLE, one fails both.
 ~ A full OV-7B run takes 2.6 hours on one RTX 4090.
-// 💬 The outline says "Video index flex". I could not tell what this means. Is it the runtime above, or something else?
 
 --- S32 section Generation
 ## Chapter 4 · Generation
@@ -409,7 +422,6 @@ note: Attention is summed over a chunk's tokens and averaged over all layers and
 ~ Fruit accuracy with total blocking.
 - Block the instruction at the handoff: the math answer rate falls from 83.9% to 0.2% (LOV-7B).
 - Block previous output: responses loop, "the fruit the fruit …"
-// 💬 Thesis text (4.4.2) gives LOV-7B 67.5% accuracy with previous blocked; Table 4.2 shows 16.3. One of them needs fixing.
 
 --- S40
 ## Results
@@ -433,7 +445,6 @@ note: Attention is summed over a chunk's tokens and averaged over all layers and
 - **Denial:** "The fruit in the image is not applicable." (QVL-7B)
 - **Recovery:** "… not oranges, its a close-up of oranges." (QVL)
 [A35] Five cards, one per failure mode: the image, the blocked step, and the model's output.
-// 💬 "its" is verbatim model output. Keep it, or mark it [sic]?
 
 --- S42 content Summary
 ## Summary
@@ -443,11 +454,77 @@ note: Attention is summed over a chunk's tokens and averaged over all layers and
 - **Generation:** attention follows the task token by token, and boosting it at the right step helps.
 // 💬 Agent-added: the outline has no closing slide. Edit or delete.
 
+--- S45
+## Publications
+# This thesis in print
+### CueCAn: Cue-Driven Contextual Attention for Identifying Missing Traffic Signs on Unconstrained Roads
+~ **V. Gupta**, A. Subramaniam, C.V. Jawahar, R. Saluja · ICRA 2023
+### C4MTS: Challenge on Categorizing Missing Traffic Signs from Contextual Cues
+~ **V. Gupta**, S. Nagar, S. P. Choudhury, R. Singh, A. Jamwal, V. Gupta, A. Subramaniam, C.V. Jawahar, R. Saluja · Springer LNEE, vol. 1218, 2023
+### VELOCITI: Benchmarking Video-Language Compositional Reasoning with Strict Entailment
+~ D. Saravanan†, **V. Gupta**†, D. Singh, Z. Khan, V. Gandhi, M. Tapaswi · CVPR 2025
+### Attending to Multimodal Generation One Token at a Time
+~ **V. Gupta**, V. Gandhi, M. Tapaswi · Under review, arXiv 2026
+~ † equal contribution
+// 💬 Check the equal-contribution mark on VELOCITI; the symbol was lost when I extracted the thesis text.
+
+--- S46
+## Artifacts
+# Released for others to use
+- **MTSVD:** 10K sign tracks and 2K missing-sign clips
+- **C4MTS:** a challenge built on MTSVD
+- **VELOCITI:** seven tests, StrictVLE evaluation code
+- **OTaT:** Fruit-Math and the attention analysis framework
+[media] One QR code per artifact, linking to its page.
+// 💬 I need the links (project pages, GitHub, Hugging Face). Is OTaT code public yet?
+
 --- S43 title
 # Thank you
 ## Questions?
 
---- B01
+--- S47 credits
+# Thank you
+## To the many who made this possible, and the few who made it bearable
+### Advisor
+Patience, trust, and an eye for detail :: Prof. Makarand Tapaswi
+### Mentors
+Guidance, presence, frank conversations :: Prof. Vineet Gandhi
+Took an early bet :: Prof. C.V. Jawahar
+Advising collaborators :: Prof. Rohit Saluja · Dr. Anbumani Subramaniam · Dr. Subhashini Venugopalan
+### Family
+Parents :: Preeti · Harsh
+Sister :: Lakshika
+Understanding, patient, supportive :: Pradeep · Sanjeev · Caroline · Manu · Josephine
+### Co-authors
+Papers and biryanis, more of both someday :: Darshan · Zeeshan
+Knowledgeable, grounded, diligent :: Darshana
+### The company that kept me
+Constant pillars, tolerated long rants :: Chitransh · Jayesh · Shaurya · Karn
+Fun, insight, motivation :: Shivank · Balu
+Outings and collaborations :: Divy · Hardik
+The wider wisdom :: Himanshu
+Art, snacks, and flowers :: Lalitha
+The CVIT gang, family no less :: Aayan · Sunayana · Deepti · Siddharth · Chirag
+Coffee plans, kept and pending :: Omega
+Lively energy :: Bhargavi
+The most fun (read: expensive) times :: Varun P · Snigdha · Saumya
+Ambitious seniors, business pitch incoming :: Aditya · Bipasha · Rudrabha
+A bar worth looking up to :: Dhruv · Rodo
+Kind, expressive juniors :: Akshat · Vansh · Surabhi · Aparna · Devika
+A source of motivation to learn :: Varun Mehrishi
+Part of this place and this time :: Megha · Vaibhav · George · Ravi · Soumya J · Manu · Janak · Kawshik · Saket · Naren
+### Keeping everything running
+Lab staff :: Aradhana · Nagraju · Rohitha · Cecilia · Ram · Varun B
+And :: the canteen, campus, and hostel staff
+> "You only have the right to work but never to its fruits."
+~ Bhagavad Gita 2.47
+// 💬 The juniors have five names but four descriptions in the thesis (anti-onion neighbour, no shoes from the US, high on chai, night owl artist). Give me the mapping and each gets their own line.
+
+--- S48 end
+![IIIT Hyderabad](../assets/have/iiit-logo.jpg)
+~ International Institute of Information Technology, Hyderabad
+
+--- B01 content Context
 ## Backup · Chapter 2
 # CueCAn variants
 | Encoder | Precision | Recall | F1 |
@@ -460,7 +537,7 @@ note: Attention is summed over a chunk's tokens and averaged over all layers and
 | **CueCAn 5e5e3** | **97.96** | **93.22** | **95.53** |
 ~ Digits: kernel size in VGG-19 blocks 3, 4, and 5. "e": only the edge weights learn.
 
---- B02
+--- B02 content Reasoning
 ## Backup · Chapter 3
 # VELOCITI: all tests
 | Model | Ctrl | AgRand | AgBind | AgCref | ActAdv | ActMan | ActBind | EvChr | Avg |
@@ -480,7 +557,7 @@ note: Attention is summed over a chunk's tokens and averaged over all layers and
 | **Human †** | n/a | 91.5 | 92.9 | 92.6 | 92.9 | 89.9 | 91.5 | 100.0 | 93.0 |
 ~ StrictVLE accuracy. † 150 samples per test.
 
---- B03
+--- B03 content Generation
 ## Backup · Chapter 4
 # Limitations and future work
 - Free-form generation is hard to tag and evaluate at scale.
