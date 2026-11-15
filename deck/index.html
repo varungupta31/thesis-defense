@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thesis Defense</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!--
+  HOW TO EDIT
+  Everything between the <script type="text/markdown"> tags below is the talk.
+  Edit the text, save, refresh the browser. Nothing else to run.
+
+  --- S12 layout Label   starts a slide. Id first (never renumber), then optional layout,
+                         then an optional word that starts a new chapter in the progress bar.
+                         Layouts: content (default), title, section, statement, media, people
+  # Title                slide title
+  ## Kicker              small label above the title (subtitle on title slides)
+  ### Heading            small heading inside a column
+  > Takeaway             the one line the audience should keep
+  - Bullet / 1. Step     lists
+  93.0% :: Humans        big number with a label (consecutive lines sit in a row)
+  | a | b |              table. A row with a **bold** cell is highlighted
+  [A10] description      media placeholder. Id from assets.md, or [media] if none yet
+  ~ Fine print           small grey line (sources, footnotes)
+  +++                    start a new column
+  note: text             speaker notes (press N)
+  // text                comment, never shown
+
+  Keys: arrows / space to move, N notes, O overview, F fullscreen. URL #S12 jumps to a slide.
+  Print to PDF from the browser: one slide per page.
+-->
+<script type="text/markdown" id="slides">
+
+--- S01 title
+# Attending to Visual Representations
+## Context, Reasoning, and Multimodal Generation
+Varun Gupta
+MS by Research · Public Defense
+Advisor: Prof. Makarand Tapaswi
+IIIT Hyderabad · 21 November 2026
+[A01] IIIT Hyderabad logo, small, in a corner.
+
+--- S02 people
+# Meet et al.
+- Makarand Tapaswi
+- Vineet Gandhi
+- C.V. Jawahar
+- Subhashini Venugopalan
+- Anbumani Subramanian
+- Rohit Saluja
+- Darshan Singh
+- Darshana Saravanan
+[A02] Circular headshots replace the initials.
+// 💬 The thesis spells "Subramaniam" in the publication list and "Subramanian" elsewhere. Which is right?
+
+--- S03
+# Outline
+1. Introduction
+2. **Context** · Missing traffic signs · ICRA
+3. **Reasoning** · Compositionality in video · CVPR
+4. **Generation** · Attention during decoding · Under review
+5. Summary
+~ The bar at the bottom tracks where we are.
+
+--- S04 section Introduction
+## Chapter 1
+# Introduction
+
+--- S05 statement
+## Introduction
+> "Above all others, the sense of sight."
+~ Aristotle, Metaphysics
+30% :: of the human cerebral cortex processes vision, more than any other sense
+note: Plato tied knowing to seeing clearly. An infant observes the world long before it can speak or reason.
+
+--- S06
+## Introduction
+# From specialists to generalists
+[A03] Timeline, left to right: compact CNNs trained for one task, then vision transformers, then billion-parameter multimodal LLMs that handle many tasks. Each era lights up in turn; our three works are pinned where they sit.
+> One question across this shift: how do models use what they see?
+
+--- S07
+## Introduction
+# Three works
+### Context
+Can a CNN find a traffic sign that is missing?
+~ CueCAn and MTSVD · CNN
+[A10] Road loop with the predicted sign location glowing.
++++
+### Reasoning
+Do video LLMs know who did what, and when?
+~ VELOCITI · Video LLMs
+[A20] Clip loop with a true and a false caption.
++++
+### Generation
+How does a multimodal LLM use the image while it writes?
+~ OTaT · Multimodal LLMs
+[A31] Output tokens appearing one by one.
+
+--- S08 section Context
+## Chapter 2 · Context
+# Missing Traffic Signs
+Contextual attention and the MTSVD dataset · ICRA
+~ Problem · Prior work · Method · Results
+
+--- S09
+## Problem
+# Missing signs make roads less safe
+12.6% :: of accidents caused by driver error are due to traffic-sign violations
+- On poorly maintained roads, signs go missing.
+- Driver-assist systems and autonomous vehicles rely on signs to read the road.
+- Finding missing signs by hand is slow.
+[A17] Two dashcam frames of the same kind of curve: one with its warning sign, one without.
+
+--- S10 statement
+## Problem
+# How do you detect something that is not there?
+- Detectors find objects. Here, the object is absent.
+- No dataset of missing signs exists, so there is no ground truth.
+- The only evidence is context: a curve, a gap in the median, a speed bump.
+> Find the cue, then place the sign.
+
+--- S11
+## Prior work
+# Missing objects with simple cues
+| Dataset | Frames with missing objects | Public | Varied cues |
+|---|---|---|---|
+| Missing curbs (Tohme) | 1,086 | × | × |
+| Missing pedestrians | < 475 | × | × |
+| Missing barricades | 853 | × | × |
+| **MTSVD (ours)** | **135K (2K videos)** | **✓** | **✓** |
+> In prior datasets, the cue sits next to the object or always looks the same. A sign usually stands away from its cue, and each sign type has its own cue.
+note: Sun et al. find missing curbs with a Siamese network on image and masked-image pairs. Chien et al. predict where pedestrians could stand, with an FCN on Cityscapes. Chian et al. annotate missing barricades on construction sites. Local context works for them. For signs it does not, because the sign is away from its cue.
+
+--- S12 media
+# MTSVD
+## Missing Traffic Signs Video Dataset
+[A10] Full-bleed dashcam loop. Annotated sign tracks appear, then a stretch where the cue is visible and the sign is missing.
+
+--- S13
+## Dataset
+# MTSVD at a glance
+10K :: traffic-sign tracks
+60+ :: sign categories
+2K :: clips with missing signs
+20+ :: cue types
+- Unconstrained Asian roads: night, rain, varied terrain
+- The first public dataset for missing objects
+[A19] Annotated frames: boxes on signs, red tags for attributes such as "tilted" or "occluded".
+note: DDPAI X2S Pro dashcam, 2560 × 1440 at 25 fps. Each track is tagged for occlusion, tilt, damage, truncation, and non-standard signs. Cue intervals are labelled frame by frame, since some signs appear before their cue (for example, U-turn).
+// 💬 The thesis says "Asia". Should this say India?
+
+--- S14
+## Method
+# CueCAn: cue-driven contextual attention
+> A cue breaks the pattern of the road. Fill it in from its surroundings, then measure what changed.
+1. Fill each row and column of the feature map from its neighbours.
+2. Subtract the filled map from the original. Road and sky cancel out; cues remain.
+3. Merge the difference back into the features.
+[A14] Feature map with a speed bump. A row fill sweeps across, the filled map is subtracted, and the bump glows in the difference map.
+note: Average-pool to 8 rows. Learnable 3 × 3 or 5 × 5 convolutions with the centre row (or column) fixed to zero. Upsample, subtract from F, concatenate to 3C channels, Conv + ReLU back to C. Edge-only kernels, where only the boundary weights learn, work best. The units sit after VGG-19 blocks 3, 4, and 5.
+
+--- S15
+## Method
+# Classify first, then localize
+1. The encoder with CueCAn learns one bit per frame: is a cue present?
+2. An FCN-8 decoder is added, and the whole network learns to segment where the sign belongs.
+> Missing signs have no ground truth. We inpaint real signs out of the frame, and the erased region becomes the target.
+[A18] Pipeline strip: frame with a sign, the sign inpainted away, encoder with CueCAn, decoder, predicted mask over the erased spot.
+note: 12,500 frames in four balanced sets: sign with cue, cue with inpainted sign, sign without cue, and neither. Binary cross-entropy for classification, focal loss for segmentation.
+
+--- S16
+## Results
+# The encoder learns to find cues
+| Encoder | Precision | Recall | F1 |
+|---|---|---|---|
+| VGG-19 | 94.77 | 87.45 | 90.96 |
+| **VGG-19 + CueCAn** | **97.96** | **93.22** | **95.53** |
+> Trained with one yes/no label per frame, it still learns many cue types.
+[A15] GradCAM side by side: the vanilla encoder misses the cue; CueCAn attends to the curve and the median gap.
+
+--- S17
+## Results
+# Localizing the missing sign
+| Method | Recall |
+|---|---|
+| SFC (Sun et al.) | 34.7 |
+| FCN (Chien et al.) | 47.7 |
+| **CueCAn** | **64.9** |
+| FCN + box post-processing | 71.4 |
+| **CueCAn + box post-processing** | **86.8** |
+[A16] Green masks on scenes with no sign: at the neck of a median gap, beside a right-hand curve.
+note: Prior methods predict no mask at all on these samples. Failure case: two signs predicted for one distant cue.
+
+--- S18
+## Results
+# From frames to video
+- A random forest classifies each predicted region by its position and shape.
+- A majority vote across frames labels the clip.
+| Task | Precision | Recall | F1 |
+|---|---|---|---|
+| Region classification | 59 | 60 | 59.49 |
+| Video recognition | 37.50 | 50 | 42.85 |
+[A10] Output video: predicted sign locations drawn over the drive.
+note: 2K clips with missing signs, plus 2K clips without cues for balance.
+
+--- S19 section Reasoning
+## Chapter 3 · Reasoning
+# VELOCITI
+Video et Language Compositionality Through Time · CVPR
+~ Problem · Prior work · Method · Results
+
+--- S20
+## Problem
+# Compositional reasoning in video
+> Near a parking lot, a man in a black hat smiles at a woman in a purple shirt. She claps as a man in grey pants spins on one leg.
+1. Perceive the parts: people and actions.
+2. Bind them across time: who did what, to whom, and in what order.
+[A22] The movie clip plays. Small tags pop up as each binding forms: (man 1, black hat), (man 2, spins on one leg), (woman, claps).
+
+--- S21 statement
+## Problem
+# Can today's video LLMs do this on short clips?
+49.3% :: best model (Gemini-1.5-Pro)
+93.0% :: humans
+~ StrictVLE accuracy on the VELOCITI subset
+note: The field has moved to long video. Short-clip reasoning is a prerequisite for it.
+
+--- S22
+## Prior work
+# A crowded space, even then
+[A23] Grid of 17 earlier video-language benchmarks against our criteria, with the VELOCITI row highlighted.
+- Separate tests for agents, actions, and event order
+- Strict entailment: earlier entailment benchmarks only rank the two captions
+- Negatives built from the video itself
+note: Also: short, complex movie clips with several people, unlike indoor single-person Charades. Tests are checked against text-only and single-frame shortcuts.
+
+--- S23
+## Benchmark
+# Seven tests, three facets
+[A24] Venn diagram of agents, actions, and multiple events. Each test fades in at its place; colour shows how its negative caption is built.
+- **Agents:** random · binding · coreference
+- **Actions:** adversarial · manner · binding
+- **Events:** chronology
+~ 10-second movie clips from VidSitu, with dense semantic-role annotations
+
+--- S24
+## Benchmark
+# Same clip, harder negatives
+| | Caption |
+|---|---|
+| True | Near a parking lot, a man in grey pants is spinning around on one leg |
+| Agent random | Near a parking lot, the **warrior in brown** is spinning around on one leg |
+| Agent binding | Near a parking lot, the **man with a black hat** is spinning around on one leg |
+> Agent binding swaps in a person who is in the clip. Spotting people is not enough; the model must bind each one to the right action.
+[A21] The seven test GIFs in a grid; click one to play it large.
+
+--- S25
+## Metric
+# ClassicVLE vs StrictVLE
+Video: a red traffic light
+| Caption | P(Yes) | Classic | Strict |
+|---|---|---|---|
+| "The light is red" | 0.7 | ✓ | ✓ |
+| "The light is green" | 0.6 | ✓ | × |
+> Video LLMs often say Yes to both captions. StrictVLE requires Yes to the true caption and No to the false one.
+~ Random chance is 25%. Greedy Yes/No decoding makes it work for closed models too.
+[A25] Two bars per sample. The 0.5 line appears, and the tick for the false caption turns into a cross.
+
+--- S26
+## Metric
+# Where the scores fall
+[A28] One scatter per model: score for the true caption on x, for the false caption on y. The ideal is the bottom-right corner. Small models crowd the top right; OV-72B spreads below the diagonal, but only about half its points reach the corner.
+- Top right: says Yes to everything
+- Near the diagonal: cannot tell the captions apart
+- Bottom right: correct under StrictVLE
+
+--- S27
+## Metric
+# Why not multiple choice?
+76.0% :: OV-72B, multiple choice
+43.1% :: OV-72B, StrictVLE
+- Seeing both captions turns the task into picking the likelier one.
+- Order sways the answer: OV-7B is 67.8 points more accurate when the answer is option B.
+~ Multiple choice counted correct only when right in both orders.
+
+--- S28
+## Results
+# Every model struggles
+| Model | Control | VELOCITI |
+|---|---|---|
+| Random | 25.0 | 25.0 |
+| QVL-7B | 84.6 | 15.9 |
+| OV-7B | 81.6 | 32.1 |
+| OV-72B | 79.3 | 43.1 |
+| Gemini-1.5-Flash † | 91.9 | 23.9 |
+| GPT-4o † | 63.3 | 46.2 |
+| Gemini-1.5-Pro † | 74.3 | 49.3 |
+| **Human †** | n/a | **93.0** |
+~ StrictVLE accuracy. Control: the false caption comes from another video. † 150 samples per test.
+// 💬 The outline lists GradCAM under these results; it seems carried over from Chapter 2. Delete?
+
+--- S29
+## Results
+# What the scores show
+- Actions are harder than agents. OV-72B: 35.8 vs 49.2
+- Negatives from inside the video are harder. GPT-4o: 54.9 → 49.4
+- Event order is near chance for most models.
+- Small models say Yes too often.
+
+--- S30
+## Validation
+# Does VELOCITI need video?
+| Change | Model | Accuracy |
+|---|---|---|
+| No video | OV-72B | 43.1 → 8.1 |
+| Text-only LLM | Qwen2 | 3.7 |
+| One frame | OV-7B | 32.1 → 19.0 |
+| 8 fps instead of 1 | OV-7B | 32.1 → 35.6 |
+| Chain-of-thought | OV-72B | 44.5 → 29.1 |
+| Chain-of-thought | Gemini-1.5-Pro | 49.3 → 41.9 |
+> Without the video, or with one frame, scores fall sharply. Chain-of-thought makes them worse.
+note: At 8 fps, OV-72B drops 9 to 11 points on the action adversarial and action manner tests, perhaps because of the long context.
+
+--- S31
+## Validation
+# Humans and failures
+93.0% :: human accuracy
+2,100 :: video-caption pairs, 3 annotators
+[A29] Three OV-72B samples, each with 10 frames, both captions, and both scores: one passes StrictVLE, one passes only ClassicVLE, one fails both.
+~ A full OV-7B run takes 2.6 hours on one RTX 4090.
+// 💬 The outline says "Video index flex". I could not tell what this means. Is it the runtime above, or something else?
+
+--- S32 section Generation
+## Chapter 4 · Generation
+# OTaT
+Attending to Multimodal Generation One Token at a Time · Under review
+~ Problem · Prior work · Method · Results
+
+--- S33
+## Problem
+# How does a multimodal LLM use the image while it writes?
+> "A wing would be a most mystifying structure if one did not know that birds flew."
+~ H. B. Barlow
+- The model writes one token at a time, over a growing context.
+- At each step it chooses what to read: the image, the text, the instruction, or its own output.
+[A30] A response types out word by word while the image and text glow as each word draws on them.
+
+--- S34
+## Prior work
+# Prior work asks where; we ask when
+- Interpretability studies isolate layers, heads, and circuits.
+- Earlier blocking studies cut image attention for a single output token.
+> We average over all layers and heads, and follow every decoding step.
+
+--- S35
+## Tasks
+# Tasks that switch between modalities
+[A32] One sample from each task, side by side.
++++
+### Fruit-Math · new
+A fruit image and an unrelated math puzzle. Name the fruit, then solve the puzzle.
+~ The two inputs share no information, so each one's role can be traced on its own.
+### VSR · from Mixed Signals
+The image and caption disagree on a spatial relation. Report both.
+### ChartQA
+Two questions about one chart, in one response.
+~ Models: LLaVA-OneVision 0.5B, 7B · Qwen2.5-VL 3B, 7B
+
+--- S36
+## Method
+# Follow attention one token at a time
+1. Split the context into chunks: image, text, instruction, previous output.
+2. At each step, measure how much the current token attends to each chunk.
+3. Subtract each chunk's mean so that changes stand out.
+4. Tag output tokens by role, such as "fruit name" or "handoff", and average across the dataset.
+[A31] Output tokens appear one by one; under each, a stacked bar shows attention split across chunks.
+note: Attention is summed over a chunk's tokens and averaged over all layers and heads. Raw scores mislead: the first token gets about 0.3 of the attention, yet blocking it changes nothing. Hence the normalization.
+
+--- S37
+## Method
+# Block it, then boost it
+- **Block:** stop information flowing from a chunk at a chosen step.
+- **Total blocking** cuts the flow to every later token. Lazy blocking cuts only the current one, so information leaks in through intermediate tokens.
+- **Boost:** scale attention to one chunk at one step, then renormalize.
+[A33] Attention mask grid. The causal triangle draws in grey, then the blocked region slides in red: first one row (lazy), then the full block (total).
+
+--- S38
+## Results
+# Attention follows the task
+- Image attention peaks while naming the fruit.
+- Text attention peaks at the math answer.
+- At the handoff, models revisit the instruction.
+- Attention to their own output rises steadily.
+> Reverse the task order and the peaks swap.
+[A34] Bar chart by output role (intro, fruit, handoff, math), one bar per chunk, growing left to right as the sentence is written.
+~ Same pattern in both model families and on ChartQA.
+
+--- S39
+## Results
+# Blocking confirms it
+| Image blocked while writing | LOV-0.5B | LOV-7B | QVL-3B | QVL-7B |
+|---|---|---|---|---|
+| Nothing | 65.1 | 64.9 | 64.8 | 65.3 |
+| **The fruit name** | **31.1** | **15.0** | **37.3** | **28.5** |
+| "The fruit in the image is" | 69.1 | 70.9 | 65.5 | 69.5 |
+~ Fruit accuracy with total blocking.
+- Block the instruction at the handoff: the math answer rate falls from 83.9% to 0.2% (LOV-7B).
+- Block previous output: responses loop, "the fruit the fruit …"
+// 💬 Thesis text (4.4.2) gives LOV-7B 67.5% accuracy with previous blocked; Table 4.2 shows 16.3. One of them needs fixing.
+
+--- S40
+## Results
+# Boost the right modality at the right step
+| Model | Boost | Image | Text | Both |
+|---|---|---|---|---|
+| LOV-7B | none | 20.6 | 55.9 | 16.7 |
+| LOV-7B | image, always | 17.7 | 15.6 | 11.5 |
+| **LOV-7B** | **ours** | **53.9** | **73.5** | **48.0** |
+| QVL-7B | none | 52.0 | 76.5 | 45.1 |
+| QVL-7B | image, always | 40.2 | 53.9 | 30.4 |
+| **QVL-7B** | **ours** | **61.8** | **81.4** | **55.9** |
+~ VSR accuracy. Ours: boost the image at the first image-relation token, the text at the first text-relation token.
+> LOV-7B reads the text even when stating the image relation. Targeted boosting adds 31.3 points.
+
+--- S41
+## Results
+# When the image is cut off
+- **Language prior:** LOV-7B often answers "banana".
+- **Leakage:** "The fruit in the image is money." (LOV-0.5B)
+- **Denial:** "The fruit in the image is not applicable." (QVL-7B)
+- **Recovery:** "… not oranges, its a close-up of oranges." (QVL)
+[A35] Five cards, one per failure mode: the image, the blocked step, and the model's output.
+// 💬 "its" is verbatim model output. Keep it, or mark it [sic]?
+
+--- S42 content Summary
+## Summary
+# What we learned
+- **Context:** CueCAn finds the cue and places the missing sign. MTSVD is the first public dataset for the task.
+- **Reasoning:** under StrictVLE, video LLMs trail humans by a wide margin at binding who did what, and when.
+- **Generation:** attention follows the task token by token, and boosting it at the right step helps.
+// 💬 Agent-added: the outline has no closing slide. Edit or delete.
+
+--- S43 title
+# Thank you
+## Questions?
+
+--- B01
+## Backup · Chapter 2
+# CueCAn variants
+| Encoder | Precision | Recall | F1 |
+|---|---|---|---|
+| VGG-19 | 94.77 | 87.45 | 90.96 |
+| CueCAn 333 | 94.87 | 93.96 | 94.41 |
+| CueCAn 553 | 95.30 | 92.20 | 93.72 |
+| CueCAn 753 | 92.48 | 90.99 | 91.73 |
+| CueCAn 5e53 | 96.05 | 94.49 | 95.26 |
+| **CueCAn 5e5e3** | **97.96** | **93.22** | **95.53** |
+~ Digits: kernel size in VGG-19 blocks 3, 4, and 5. "e": only the edge weights learn.
+
+--- B02
+## Backup · Chapter 3
+# VELOCITI: all tests
+| Model | Ctrl | AgRand | AgBind | AgCref | ActAdv | ActMan | ActBind | EvChr | Avg |
+|---|---|---|---|---|---|---|---|---|---|
+| Random | 25.0 | 25.0 | 25.0 | 25.0 | 25.0 | 25.0 | 25.0 | 25.0 | 25.0 |
+| PLLaVA | 1.3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
+| Owl-Con | 24.3 | 3.4 | 0.7 | 0.0 | 4.3 | 2.8 | 0.6 | 0.1 | 1.7 |
+| Video-LLaVA | 65.8 | 16.4 | 7.6 | 0.3 | 8.7 | 3.3 | 10.6 | 3.9 | 7.3 |
+| QVL-7B | 84.6 | 39.1 | 13.5 | 6.5 | 17.8 | 17.5 | 16.4 | 0.4 | 15.9 |
+| OV-7B | 81.6 | 56.7 | 32.9 | 8.0 | 29.7 | 30.6 | 36.4 | 30.5 | 32.1 |
+| OV-72B | 79.3 | 63.7 | 45.4 | 38.6 | 33.1 | 29.3 | 45.1 | 46.5 | 43.1 |
+| Gemini-1.5-Flash † | 91.9 | 56.4 | 23.8 | 4.7 | 32.9 | 21.6 | 25.0 | 2.7 | 23.9 |
+| QVL-72B † | 82.7 | 56.0 | 29.3 | 35.3 | 30.0 | 24.0 | 35.3 | 1.3 | 30.2 |
+| OV-72B † | 81.3 | 64.0 | 46.7 | 41.3 | 30.7 | 32.7 | 46.0 | 50.0 | 44.5 |
+| GPT-4o † | 63.3 | 54.7 | 44.7 | 40.7 | 55.0 | 42.0 | 54.0 | 32.2 | 46.2 |
+| Gemini-1.5-Pro † | 74.3 | 60.1 | 49.7 | 36.7 | 52.3 | 43.5 | 52.3 | 50.3 | 49.3 |
+| **Human †** | n/a | 91.5 | 92.9 | 92.6 | 92.9 | 89.9 | 91.5 | 100.0 | 93.0 |
+~ StrictVLE accuracy. † 150 samples per test.
+
+--- B03
+## Backup · Chapter 4
+# Limitations and future work
+- Free-form generation is hard to tag and evaluate at scale.
+- Why model families differ (Qwen denies, LLaVA does not) is still open.
+- Boost factor and decoding strategy are not yet tuned per model.
+- Attention analysis needs eager attention, which is slow.
+
+</script>
+<script src="engine.js"></script>
+</body>
+</html>
