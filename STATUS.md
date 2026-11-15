@@ -5,8 +5,8 @@
 
 ## Phases
 
-1. [ ] Outline — Varun fills Role / Takeaway / Visual per slide
-2. [ ] Asset audit — list have/need in `assets.md`, decide what to make
+1. [x] Outline — Varun fills Role / Takeaway / Visual per slide
+2. [x] Asset audit — list have/need in `assets.md`, decide what to make
 3. [ ] Style sampler — 3 slides × 2–3 directions, pick one
 4. [ ] Engine — nav, reveals, notes, grid, PDF export
 5. [ ] Build — section by section, review in browser
@@ -14,8 +14,8 @@
 
 ## Next
 
-- Varun: fill `outline.md` (Role/Takeaway/Visual minimum), drop existing figures/GIFs into `assets/have/`.
-- Agent: wait for outline; then asset audit + style sampler.
+- Varun: fill `need` rows in `assets.md` (collaborator photos, CueCAN diagram source, table numbers). Check Ch3 'GradCAM' and Tasks VSR vs MixedSignals.
+- Agent: style sampler; compress videos, GIF→MP4 (needs `brew reinstall ffmpeg`).
 
 ## Open questions
 
