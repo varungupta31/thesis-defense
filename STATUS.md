@@ -22,6 +22,13 @@
 - Talk length + defense date?
 - Stack: single-file HTML (recommended) vs React+Vite vs reveal.js?
 
+## Ideas (parked)
+
+- Animated architecture diagrams: SVG redraw + GSAP, keypress-stepped (reversible). Limit to 2–4 key diagrams.
+- Image → patches → encoder sequence: grid draws, tiles split, fly into token row, pos-emb fade, into encoder, output out.
+- Stop-motion feel: patches assembling "like art" (staggered, slightly jittery tile arrival) to add life. Varun likes this.
+- Agent can build proof-of-concept of patch animation with placeholder image when asked.
+
 ## Decisions
 
 | Date | Decision | Why |

@@ -16,6 +16,7 @@ Only **Role**, **Takeaway**, **Visual** are required. Skip the rest or write `?`
 | On slide | Rough content: bullets, numbers, equation, table — messy is fine |
 | Visual | What you picture. Link asset id from `assets.md` (e.g. `A03`) |
 | Interaction | Optional: reveal-by-click, slider, hover, video play, … |
+| Steps | Animated diagrams only: numbered list of what appears/moves per keypress. Add diagram source (draw.io/Figma/TikZ/PPT/PNG) |
 | Time | Seconds/minutes you want to spend |
 | Notes | What you'd say. Rough is fine |
 | Help | `none` · `content` (draft text for me) · `visual` (design an idea) · `both` |
