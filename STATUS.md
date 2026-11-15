@@ -1,6 +1,6 @@
 # Status
 
-**Phase:** 1 — Outline (Varun drafting `outline.md`)
+**Phase:** 2 — Asset audit done (`assets.md`); next: style sampler
 **Updated:** 2026-11-15
 
 ## Phases
@@ -19,7 +19,6 @@
 
 ## Open questions
 
-- Talk length + defense date?
 - Stack: single-file HTML (recommended) vs React+Vite vs reveal.js?
 
 ## Ideas (parked)
@@ -35,3 +34,4 @@
 |---|---|---|
 | 2026-11-15 | Outline in Markdown, not Sheets | Git-diffable, any agent reads it locally, no connector needed |
 | 2026-11-15 | Media via Git LFS | GIFs/videos bloat normal git history |
+| 2026-11-15 | Repo is public, thesis PDF + all media included | Varun's call: git = copy mechanism to office laptop |
