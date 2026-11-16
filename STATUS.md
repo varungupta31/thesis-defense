@@ -26,6 +26,11 @@
 - OTaT "bird green": no asset with the bird here; using #23874b as a placeholder. Need the logo or hex.
 - 48 main slides for 45 min is over budget; flow notes from 2026-11-16 session suggest ~32.
 
+## How media is built
+
+- Figures: `tools/make_figs.py` (needs `pymupdf`, `pillow`; expects arXiv sources unpacked under `%TEMP%/thesis/arxiv/<id>/`).
+- Videos: `ffmpeg -an -vf "scale='min(1600,iw)':-2,fps=25" -c:v libx264 -preset slow -crf 28 -pix_fmt yuv420p -movflags +faststart`.
+
 ## Ideas (parked)
 
 - Animated architecture diagrams: SVG redraw + GSAP, keypress-stepped (reversible). Limit to 2–4 key diagrams.
