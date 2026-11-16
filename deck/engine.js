@@ -29,6 +29,7 @@
       const s = t(i);
       if (!s) { i++; continue; }
       if (s === '+++') { out.push({ type: 'col' }); i++; }
+      else if (s === '===') { out.push({ type: 'endcols' }); i++; }
       else if (/^note:/i.test(s)) { notes.push(s.replace(/^note:\s*/i, '')); i++; }
       else if (s.startsWith('### ')) { out.push({ type: 'h3', text: s.slice(4) }); i++; }
       else if (s.startsWith('## ')) { out.push({ type: 'kicker', text: s.slice(3) }); i++; }
@@ -43,7 +44,16 @@
       else if (s.startsWith('~ ')) { out.push({ type: 'small', text: s.slice(2) }); i++; }
       else { out.push({ type: 'p', text: s }); i++; }
     }
-    return { out, notes };
+    // consecutive images sit side by side
+    const grouped = [];
+    for (const b of out) {
+      const prev = grouped[grouped.length - 1];
+      if (b.type === 'img' && prev && (prev.type === 'img' || prev.type === 'gallery')) {
+        if (prev.type === 'img') grouped[grouped.length - 1] = { type: 'gallery', items: [prev, b] };
+        else prev.items.push(b);
+      } else grouped.push(b);
+    }
+    return { out: grouped, notes };
   }
 
   const slides = parse(src);
@@ -71,11 +81,12 @@
       case 'p': return `<p>${inline(b.text)}</p>`;
       case 'small': return `<p class="small">${inline(b.text)}</p>`;
       case 'ol': return `<ol>${b.items.map(li).join('')}</ol>`;
+      case 'gallery': return `<div class="gallery">${b.items.map(x => html(x, layout)).join('')}</div>`;
       case 'img': return /\.(mp4|webm|mov)$/i.test(b.src)
-        ? `<figure class="img"><video src="${esc(b.src)}" autoplay muted loop playsinline></video></figure>`
+        ? `<figure class="img"><video src="${esc(b.src)}" muted loop playsinline preload="auto"></video></figure>`
         : `<figure class="img"><img src="${esc(b.src)}" alt="${esc(b.alt)}"></figure>`;
       case 'ul':
-        if (layout === 'people') return `<div class="faces">${b.items.map(x => {
+        if (layout === 'people') return `<div class="faces" style="--cols:${Math.ceil(b.items.length / 2)}">${b.items.map(x => {
           const [name, photo] = x.split(' | ').map(v => v.trim());
           const face = photo ? `<img src="${esc(photo)}" alt="">` : esc(initials(name));
           return `<figure><div class="face">${face}</div><figcaption>${inline(name)}</figcaption></figure>`;
@@ -128,9 +139,13 @@
     const rest = out.slice(k);
     let body;
     if (rest.some(b => b.type === 'col')) {
+      // "+++" starts a column; "===" closes the columns and the rest runs full width below
+      const end = rest.findIndex(b => b.type === 'endcols');
+      const after = end < 0 ? [] : rest.splice(end).slice(1);
       const cols = [[]];
       rest.forEach(b => b.type === 'col' ? cols.push([]) : cols[cols.length - 1].push(b));
-      body = `<div class="cols">${cols.filter(c => c.length).map(c => `<div class="col"${c[0].type === 'h3' ? tint(c[0].text) : ''}>${c.map(b => html(b, s.layout)).join('')}</div>`).join('')}</div>`;
+      body = `<div class="cols">${cols.filter(c => c.length).map(c => `<div class="col"${c[0].type === 'h3' ? tint(c[0].text) : ''}>${c.map(b => html(b, s.layout)).join('')}</div>`).join('')}</div>`
+        + after.map(b => html(b, s.layout)).join('');
     } else {
       body = rest.map(b => html(b, s.layout)).join('');
     }
@@ -173,6 +188,7 @@
   function go(i) {
     cur = Math.max(0, Math.min(frames.length - 1, i));
     frames.forEach((f, k) => f.classList.toggle('current', k === cur));
+    frames.forEach((f, k) => f.querySelectorAll('video').forEach(v => k === cur ? v.play().catch(() => {}) : v.pause()));
     if (roll) { roll.cancel(); roll = null; }
     const r = frames[cur].querySelector('.roll');
     if (r) {

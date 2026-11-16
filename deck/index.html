@@ -29,6 +29,7 @@
   - Name | path          on a "people" slide: the photo for that person
   ~ Fine print           small grey line (sources, footnotes)
   +++                    start a new column
+  ===                    end the columns; what follows runs full width below
   note: text             speaker notes (press N)
   // text                comment, never shown
 
@@ -56,7 +57,8 @@ IIIT Hyderabad · 21 November 2026
 - Rohit Saluja | ../assets/have/people/rohit_saluja.jpeg
 - Darshan Singh | ../assets/have/people/darshan_singh.jpg
 - Darshana Saravanan | ../assets/have/people/darshana_saravanan.jpg
-// 💬 Subhashini's photo is missing from assets/have/people.
+- Zeeshan Khan
+// 💬 Photos missing for Subhashini and Zeeshan.
 
 --- S03
 # Outline
@@ -90,17 +92,20 @@ note: Plato tied knowing to seeing clearly. An infant observes the world long be
 ### Context
 Can a CNN find a traffic sign that is missing?
 ~ CueCAn and MTSVD · CNN
-[A10] Road loop with the predicted sign location glowing.
+// A10
+![CueCAn prediction](../assets/made/cuecan/prediction-rain.mp4)
 +++
 ### Reasoning
 Do video LLMs know who did what, and when?
 ~ VELOCITI · Video LLMs
-[A20] Clip loop with a true and a false caption.
+// A20
+![VELOCITI tests](../assets/made/velociti/all-tests-banner.mp4)
 +++
 ### Generation
 How does a multimodal LLM use the image while it writes?
 ~ OTaT · Multimodal LLMs
-[A31] Output tokens appearing one by one.
+// A31
+![OTaT process](../assets/made/otat/process.mp4)
 
 --- S08 section Context
 ## Chapter 2 · Context
@@ -115,7 +120,9 @@ Contextual attention and the MTSVD dataset · ICRA
 - On poorly maintained roads, signs go missing.
 - Driver-assist systems and autonomous vehicles rely on signs to read the road.
 - Finding missing signs by hand is slow.
-[A17] Two dashcam frames of the same kind of curve: one with its warning sign, one without.
++++
+// A17
+![Missing signs](../assets/made/cuecan/missing-samples.mp4)
 
 --- S10 statement
 ## Problem
@@ -140,7 +147,8 @@ note: Sun et al. find missing curbs with a Siamese network on image and masked-i
 --- S12 media
 # MTSVD
 ## Missing Traffic Signs Video Dataset
-[A10] Full-bleed dashcam loop. Annotated sign tracks appear, then a stretch where the cue is visible and the sign is missing.
+// A10
+![MTSVD](../assets/made/cuecan/mtsvd-intro.mp4)
 
 --- S13
 ## Dataset
@@ -151,7 +159,8 @@ note: Sun et al. find missing curbs with a Siamese network on image and masked-i
 20+ :: cue types
 - Unconstrained Indian roads: night, rain, varied terrain
 - The first public dataset for missing objects
-[A19] Annotated frames: boxes on signs, red tags for attributes such as "tilted" or "occluded".
+// A19
+![Annotated frames](../assets/made/cuecan/annotated-frames.jpg)
 note: DDPAI X2S Pro dashcam, 2560 × 1440 at 25 fps. Each track is tagged for occlusion, tilt, damage, truncation, and non-standard signs. Cue intervals are labelled frame by frame, since some signs appear before their cue (for example, U-turn).
 
 --- S14
@@ -161,7 +170,9 @@ note: DDPAI X2S Pro dashcam, 2560 × 1440 at 25 fps. Each track is tagged for oc
 1. Fill each row and column of the feature map from its neighbours.
 2. Subtract the filled map from the original. Road and sky cancel out; cues remain.
 3. Merge the difference back into the features.
-[A14] Feature map with a speed bump. A row fill sweeps across, the filled map is subtracted, and the bump glows in the difference map.
++++
+// A14 (static for now; animated version planned)
+![CueCAn unit](../assets/made/cuecan/cuecan-unit.jpg)
 note: Average-pool to 8 rows. Learnable 3 × 3 or 5 × 5 convolutions with the centre row (or column) fixed to zero. Upsample, subtract from F, concatenate to 3C channels, Conv + ReLU back to C. Edge-only kernels, where only the boundary weights learn, work best. The units sit after VGG-19 blocks 3, 4, and 5.
 
 --- S15
@@ -170,7 +181,8 @@ note: Average-pool to 8 rows. Learnable 3 × 3 or 5 × 5 convolutions with the c
 1. The encoder with CueCAn learns one bit per frame: is a cue present?
 2. An FCN-8 decoder is added, and the whole network learns to segment where the sign belongs.
 > Missing signs have no ground truth. We inpaint real signs out of the frame, and the erased region becomes the target.
-[A18] Pipeline strip: frame with a sign, the sign inpainted away, encoder with CueCAn, decoder, predicted mask over the erased spot.
+// A18
+![Pipeline](../assets/made/cuecan/pipeline-teaser.jpg)
 note: 12,500 frames in four balanced sets: sign with cue, cue with inpainted sign, sign without cue, and neither. Binary cross-entropy for classification, focal loss for segmentation.
 
 --- S16
@@ -181,7 +193,9 @@ note: 12,500 frames in four balanced sets: sign with cue, cue with inpainted sig
 | VGG-19 | 94.77 | 87.45 | 90.96 |
 | **VGG-19 + CueCAn** | **97.96** | **93.22** | **95.53** |
 > Trained with one yes/no label per frame, it still learns many cue types.
-[A15] GradCAM side by side: the vanilla encoder misses the cue; CueCAn attends to the curve and the median gap.
++++
+// A15
+![GradCAM](../assets/made/cuecan/gradcam-ablation.jpg)
 
 --- S17
 ## Results
@@ -193,7 +207,8 @@ note: 12,500 frames in four balanced sets: sign with cue, cue with inpainted sig
 | **CueCAn** | **64.9** |
 | FCN + box post-processing | 71.4 |
 | **CueCAn + box post-processing** | **86.8** |
-[A16] Green masks on scenes with no sign: at the neck of a median gap, beside a right-hand curve.
+// A16
+![Localization](../assets/made/cuecan/localization.jpg)
 note: Prior methods predict no mask at all on these samples. Failure case: two signs predicted for one distant cue.
 
 --- S18
@@ -205,7 +220,9 @@ note: Prior methods predict no mask at all on these samples. Failure case: two s
 |---|---|---|---|
 | Region classification | 59 | 60 | 59.49 |
 | Video recognition | 37.50 | 50 | 42.85 |
-[A10] Output video: predicted sign locations drawn over the drive.
++++
+// A10
+![Predictions](../assets/made/cuecan/prediction-flyover.mp4)
 note: 2K clips with missing signs, plus 2K clips without cues for balance.
 
 --- S19 section Reasoning
@@ -242,11 +259,13 @@ note: Also: short, complex movie clips with several people, unlike indoor single
 --- S23
 ## Benchmark
 # Seven tests, three facets
-[A24] Venn diagram of agents, actions, and multiple events. Each test fades in at its place; colour shows how its negative caption is built.
 - **Agents:** random · binding · coreference
 - **Actions:** adversarial · manner · binding
 - **Events:** chronology
 ~ 10-second movie clips from VidSitu, with dense semantic-role annotations
++++
+// A24 (static for now; animated version planned)
+![Venn](../assets/made/velociti/venn.png)
 
 --- S24
 ## Benchmark
@@ -274,7 +293,8 @@ Video: a red traffic light
 --- S26
 ## Metric
 # Where the scores fall
-[A28] One scatter per model: score for the true caption on x, for the false caption on y. The ideal is the bottom-right corner. Small models crowd the top right; OV-72B spreads below the diagonal, but only about half its points reach the corner.
+// A28
+![Entailment scatter](../assets/made/velociti/scatter.png)
 - Top right: says Yes to everything
 - Near the diagonal: cannot tell the captions apart
 - Bottom right: correct under StrictVLE
@@ -343,7 +363,8 @@ note: A benchmark "breaks" at the first level where an attacker comes within 5 p
 # Humans and failures
 93.0% :: human accuracy
 2,100 :: video-caption pairs, 3 annotators
-[A29] Three OV-72B samples, each with 10 frames, both captions, and both scores: one passes StrictVLE, one passes only ClassicVLE, one fails both.
+// A29
+![Qualitative](../assets/made/velociti/qualitative-strict-classic-fail.jpg)
 ~ A full OV-7B run takes 2.6 hours on one RTX 4090.
 
 --- S32 section Generation
@@ -359,7 +380,8 @@ Attending to Multimodal Generation One Token at a Time · Under review
 ~ H. B. Barlow
 - The model writes one token at a time, over a growing context.
 - At each step it chooses what to read: the image, the text, the instruction, or its own output.
-[A30] A response types out word by word while the image and text glow as each word draws on them.
+// A30
+![Motivation](../assets/made/otat/motivation.mp4)
 
 --- S34
 ## Prior work
@@ -371,15 +393,18 @@ Attending to Multimodal Generation One Token at a Time · Under review
 --- S35
 ## Tasks
 # Tasks that switch between modalities
-[A32] One sample from each task, side by side.
-+++
 ### Fruit-Math · new
 A fruit image and an unrelated math puzzle. Name the fruit, then solve the puzzle.
 ~ The two inputs share no information, so each one's role can be traced on its own.
++++
 ### VSR · from Mixed Signals
 The image and caption disagree on a spatial relation. Report both.
++++
 ### ChartQA
 Two questions about one chart, in one response.
+===
+// A32
+![Tasks](../assets/have/OTaT/tasks.png)
 ~ Models: LLaVA-OneVision 0.5B, 7B · Qwen2.5-VL 3B, 7B
 
 --- S36
@@ -389,7 +414,8 @@ Two questions about one chart, in one response.
 2. At each step, measure how much the current token attends to each chunk.
 3. Subtract each chunk's mean so that changes stand out.
 4. Tag output tokens by role, such as "fruit name" or "handoff", and average across the dataset.
-[A31] Output tokens appear one by one; under each, a stacked bar shows attention split across chunks.
+// A31
+![Process](../assets/made/otat/process.mp4)
 note: Attention is summed over a chunk's tokens and averaged over all layers and heads. Raw scores mislead: the first token gets about 0.3 of the attention, yet blocking it changes nothing. Hence the normalization.
 
 --- S37
@@ -398,7 +424,8 @@ note: Attention is summed over a chunk's tokens and averaged over all layers and
 - **Block:** stop information flowing from a chunk at a chosen step.
 - **Total blocking** cuts the flow to every later token. Lazy blocking cuts only the current one, so information leaks in through intermediate tokens.
 - **Boost:** scale attention to one chunk at one step, then renormalize.
-[A33] Attention mask grid. The causal triangle draws in grey, then the blocked region slides in red: first one row (lazy), then the full block (total).
+// A33 (static for now; animated version planned)
+![Lazy vs total blocking](../assets/made/otat/lazy-vs-total.png)
 
 --- S38
 ## Results
@@ -408,7 +435,10 @@ note: Attention is summed over a chunk's tokens and averaged over all layers and
 - At the handoff, models revisit the instruction.
 - Attention to their own output rises steadily.
 > Reverse the task order and the peaks swap.
-[A34] Bar chart by output role (intro, fruit, handoff, math), one bar per chunk, growing left to right as the sentence is written.
++++
+// A34: Fruit-Math, then the reversed Math-Fruit task (LOV-7B)
+![Fruit-Math](../assets/made/otat/bars-fruit-math-lov7b.png)
+![Math-Fruit](../assets/made/otat/bars-math-fruit-lov7b.png)
 ~ Same pattern in both model families and on ChartQA.
 
 --- S39

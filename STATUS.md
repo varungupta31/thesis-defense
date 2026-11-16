@@ -1,6 +1,6 @@
 # Status
 
-**Phase:** Content v0.1: answers folded in, chapter colours, closing sequence (publications, artifacts, credits roll, logo card). Next: resources, then media one at a time
+**Phase:** Media pass 1 done: paper figures and short videos wired into 22 slots. Next: Varun's calls on the open media decisions
 **Updated:** 2026-11-15
 
 ## Phases
@@ -48,3 +48,7 @@
 | 2026-11-16 | Chapter accents: CueCAn orange #d9650f, VELOCITI velo blue #2b6bef (from `velo_man.ico`), OTaT green #23874b (placeholder) | Varun's call; white page, only accents change. Intro and summary stay neutral slate |
 | 2026-11-16 | Close: Summary, Publications, Artifacts, Thank you / Questions, credits roll (dark), IIIT logo card | Movie ending Varun asked for; credits roll moves to the logo card by itself |
 | 2026-11-16 | Credits roles taken from the thesis acknowledgments, in his words | Inferred roles, no invented detail |
+| 2026-11-16 | Palette: CueCAn purple #8240c4 (was orange), VELOCITI blue #2b6bef, OTaT olive #7f8726 (bird3.png #969a3e, darkened for text) | Orange + green read as the Indian tricolour |
+| 2026-11-16 | Figures come from arXiv sources, rendered with PyMuPDF; videos re-encoded H.264 ≤1600w, no audio, via imageio-ffmpeg in a scratch venv | Paper-quality figures without screenshots; small files; no system installs |
+| 2026-11-16 | Videos play only on the current slide | Smooth playback with ~15 videos in one page |
+| 2026-11-16 | Title slide centred, name larger, logo bottom right, thin three-colour rule | Varun's request; the rule previews the three chapters |
